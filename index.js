@@ -3,7 +3,8 @@ const { Configuration, OpenAIApi } = require("openai");
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const fs = require('fs');
+const fs = require('fs').promises;
+const { v4: uuidv4 } = require('uuid');
 
 const downloadImage = require('./downloadImg.js');
 
@@ -36,10 +37,24 @@ app.post('/image', async (req, res) => {
     size: "256x256",
   });
 
-  const imageData = await downloadImage(response.data.data[0].url, "images/img.png");
+  const fileName = new Date();
+
+  await downloadImage(response.data.data[0].url, `images/0.png`);
 
   res.sendStatus(200);
-})
+});
+
+app.get('/image/:imgId', async (req, res) => {
+  const imgId = req.params.imgId;
+
+  const fileData = await fs.readFile(`images/${imgId}.png`);
+
+  res.send(fileData);
+});
+
+app.post('/user', (req, res) => {
+
+});
 
 app.listen(4000, (err) => {
   if (err) console.log(err);
